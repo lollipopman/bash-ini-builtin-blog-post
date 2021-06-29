@@ -5,8 +5,8 @@
 #include <unistd.h>
 #endif
 #include "bashansi.h"
+#include "inih/ini.h"
 #include "loadables.h"
-#include <ini.h>
 #include <stdio.h>
 
 static int handler(void *user, const char *section, const char *name,

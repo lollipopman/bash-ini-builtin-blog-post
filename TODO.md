@@ -16,6 +16,7 @@
 -   [x] parse ini file
 -   [x] assign ini file to bash vars
 -   [x] rename to ini
+-   [ ] vendor inih, rather than link?
 -   [ ] Create an associative array per section
 -   [ ] Create an indexed array of all sections? How would you use this
     in Bash?
