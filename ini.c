@@ -11,42 +11,63 @@
 
 static int handler(void *user, const char *section, const char *name,
                    const char *value) {
-  SHELL_VAR *entry;
-  unsigned int array_index;
-  char *array_name;
+
+  char *sec_prefix = "INI_";
+  char *toc_var_name = "INI";
+  size_t sec_size =
+      strlen(sec_prefix) + strlen(section) + 1; // +1 for the null-terminator
+  char *sec_var_name = malloc(sec_size);
+  char *p = memccpy(sec_var_name, sec_prefix, '\0', sec_size);
+  sec_size -= (p - sec_var_name - 1);
+  if (sec_size <= 0) {
+    free(sec_var_name);
+    return 0;
+  }
+  char *q = memccpy(p - 1, section, '\0', sec_size);
+  sec_size -= (q - (p - 1) - 1);
+  if (sec_size <= 0) {
+    free(sec_var_name);
+    return 0;
+  }
+  if (legal_identifier(sec_var_name) == 0) {
+    sh_invalidid(strdup(sec_var_name));
+    free(sec_var_name);
+    return 0;
+  }
+
   int vflags = 0;
   vflags |= (1 << 0);
   vflags |= (1 << 1);
-  array_name = "INI";
-  entry = find_or_make_array_variable(array_name, vflags);
-  if (entry == 0 || readonly_p(entry) || noassign_p(entry)) {
-    if (entry && readonly_p(entry)) {
-      err_readonly(array_name);
+  SHELL_VAR *sec_var = find_or_make_array_variable(sec_var_name, vflags);
+  if (sec_var == 0) {
+    free(sec_var_name);
+    return 0;
+  }
+  if (name && value) {
+    bind_assoc_variable(sec_var, sec_var_name, strdup(name), strdup(value), 0);
+  } else {
+    vflags = 0;
+    vflags |= (1 << 0);
+    vflags |= (1 << 1);
+    SHELL_VAR *toc_var = find_or_make_array_variable(toc_var_name, vflags);
+    if (toc_var == 0) {
+      free(sec_var_name);
+      return 0;
     }
-    return (EXECUTION_FAILURE);
-    /* } else if (array_p(entry) == 0) { */
-    /*   builtin_error("%s: not an indexed array", array_name); */
-    /*   return (EXECUTION_FAILURE); */
-  } else if (invisible_p(entry))
-    VUNSETATTR(entry, att_invisible); /* no longer invisible */
-
-  /* if (flags & MAPF_CLEARARRAY) */
-  /*   array_flush(array_cell(entry)); */
-
-  /* bind_array_element(entry, array_index, line, 0); */
-  SHELL_VAR *v;
-  bind_assoc_variable(entry, array_name, strdup(name), strdup(value), 0);
-  return 0;
+    bind_assoc_variable(toc_var, toc_var_name, strdup(section), strdup("true"),
+                        0);
+  }
+  free(sec_var_name);
+  return 1;
 }
 
 int ini_builtin(list) WORD_LIST *list;
 {
-  int opt, rval;
+  int opt;
   char *array_name, *inistring;
   SHELL_VAR *v;
 
   array_name = 0;
-  rval = EXECUTION_SUCCESS;
 
   reset_internal_getopt();
   while ((opt = internal_getopt(list, "a:")) != -1) {
@@ -69,9 +90,9 @@ int ini_builtin(list) WORD_LIST *list;
   file = fdopen(fd, "r");
   if (ini_parse_file(file, handler, NULL) < 0) {
     printf("Unable to read file from stdin\n");
-    return 1;
+    return (EXECUTION_FAILURE);
   }
-  return (rval);
+  return (EXECUTION_SUCCESS);
 }
 
 /* Called when builtin is enabled and loaded from the shared object.  If this

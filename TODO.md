@@ -16,11 +16,11 @@
 -   [x] parse ini file
 -   [x] assign ini file to bash vars
 -   [x] rename to ini
--   [ ] vendor inih, rather than link?
--   [ ] Create an associative array per section
--   [ ] Create an indexed array of all sections? How would you use this
-    in Bash?
--   [ ] make help better
+-   [x] vendor inih, rather than link?
+-   [x] Create an associative array per section
+-   [x] Create an associative array of all sections?
+-   [ ] Remove hard coded `INI`
+-   [ ] Error checking, malloc, return vals, etc?
+-   [ ] Improve help & docs
 -   [ ] ︙
--   [ ] vendor inih, rather than link?
 -   [ ] ?
