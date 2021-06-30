@@ -10,11 +10,16 @@ INIH_FLAGS=-DINI_CALL_HANDLER_ON_NEW_SECTION=1 -DINI_STOP_ON_FIRST_ERROR=1 -DINI
 ini.so: ini.o libinih.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-libinih.o:
+inih/ini.c:
+	git submodule update --init
+
+libinih.o: inih/ini.c
 	$(CC) $(CFLAGS) $(INIH_FLAGS) -o libinih.o inih/ini.c
 
+.PHONY: test
 test: ini.so
 	bash test.sh
 
+.PHONY: clean
 clean:
 	rm -f *.o *.so
