@@ -6,6 +6,7 @@
 #endif
 #include "inih/ini.h"
 #include "loadables.h"
+#include <errno.h>
 #include <stdio.h>
 
 char *ini_doc[] = {
@@ -73,13 +74,27 @@ static int handler(void *user, const char *section, const char *name,
 
 int ini_builtin(list) WORD_LIST *list;
 {
-  int opt;
+  intmax_t intval;
+  int opt, code;
+  int fd = 0;
   char *toc_var_name = NULL;
   reset_internal_getopt();
-  while ((opt = internal_getopt(list, "a:")) != -1) {
+  while ((opt = internal_getopt(list, "a:u:")) != -1) {
     switch (opt) {
     case 'a':
       toc_var_name = list_optarg;
+      break;
+    case 'u':
+      code = legal_number(list_optarg, &intval);
+      if (code == 0 || intval < 0 || intval != (int)intval) {
+        builtin_error("%s: invalid file descriptor specification", list_optarg);
+        return (EXECUTION_FAILURE);
+      }
+      fd = (int)intval;
+      if (sh_validfd(fd) == 0) {
+        builtin_error("%d: invalid file descriptor: %s", fd, strerror(errno));
+        return (EXECUTION_FAILURE);
+      }
       break;
     case GETOPT_HELP:
       builtin_help();
@@ -95,22 +110,21 @@ int ini_builtin(list) WORD_LIST *list;
   }
   ini_conf conf = {};
   conf.toc_var_name = strdup(toc_var_name);
-  int fd = 0;
   FILE *file = fdopen(fd, "r");
   if (ini_parse_file(file, handler, &conf) < 0) {
-    report_error("Unable to read file from stdin XXX");
+    report_error("Unable to read from fd: %d", fd);
     return (EXECUTION_FAILURE);
   }
   return (EXECUTION_SUCCESS);
 }
 
 struct builtin ini_struct = {
-    "ini",            /* builtin name */
-    ini_builtin,      /* function implementing the builtin */
-    BUILTIN_ENABLED,  /* initial flags for builtin */
-    ini_doc,          /* array of long documentation strings. */
-    "ini -a TOC_VAR", /* usage synopsis; becomes short_doc */
-    0                 /* reserved for internal use */
+    "ini",                    /* builtin name */
+    ini_builtin,              /* function implementing the builtin */
+    BUILTIN_ENABLED,          /* initial flags for builtin */
+    ini_doc,                  /* array of long documentation strings. */
+    "ini -a TOC_VAR [-u FD]", /* usage synopsis; becomes short_doc */
+    0                         /* reserved for internal use */
 };
 
 /* Called when builtin is enabled and loaded from the shared object.  If this

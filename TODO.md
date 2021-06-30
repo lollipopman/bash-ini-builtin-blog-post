@@ -20,9 +20,10 @@
 -   [x] Create an associative array per section
 -   [x] Create an associative array of all sections?
 -   [x] Remove hard coded `INI`
--   [ ] Add support for arbitrary fds, rather than just stdin
+-   [x] Add support for arbitrary fds, rather than just stdin
 -   [ ] Error checking, malloc, return vals, etc?
 -   [ ] Improve help, docs, code comments
 -   [ ] Ask for feedback oh help-bash
+-   [ ] Push out repo, test cloning
 -   [ ] ︙
 -   [ ] ?
