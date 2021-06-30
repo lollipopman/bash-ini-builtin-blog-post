@@ -10,7 +10,7 @@ INIH_FLAGS=-DINI_CALL_HANDLER_ON_NEW_SECTION=1 -DINI_STOP_ON_FIRST_ERROR=1 -DINI
 ini.so: ini.o libinih.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-libinih.o:
+libinih.o: inih/ini.c
 	$(CC) $(CFLAGS) $(INIH_FLAGS) -o libinih.o inih/ini.c
 
 test: ini.so
@@ -18,3 +18,12 @@ test: ini.so
 
 clean:
 	rm -f *.o *.so
+
+inih/ini.c: check-and-reinit-submodules
+
+.PHONY: check-and-reinit-submodules
+check-and-reinit-submodules:
+	@if git submodule status | egrep -q '^[-]|^[+]' ; then \
+		echo "INFO: Need to reinitialize git submodules"; \
+		git submodule update --init; \
+	fi
