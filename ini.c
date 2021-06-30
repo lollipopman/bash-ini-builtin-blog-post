@@ -10,12 +10,34 @@
 #include <stdio.h>
 
 char *ini_doc[] = {
-    "Read ini config from from standard input into an associtive array.",
+    "Read an ini config from stdin input into a set of associative arrays.",
     "",
-    "Read ini config from standard input into a set of associative arrays",
-    "from file descriptor FD if the -u option is supplied. The variable",
-    "MAPFILE",
-    "is the default ARRAY.",
+    "Reads an ini config from stdin input into a set of associative arrays.",
+    "The sections of the ini config are added to an associative array",
+    "specified by the `-a TOC` argument. The keys and values are then added to",
+    "associate arrays prefixed by the `TOC` name and suffixed by their ini",
+    "section name, `<TOC>_<INI_SECTION_NAME>`.",
+    "",
+    "Example:",
+    "",
+    "  Input input.ini:",
+    "    [sec1]",
+    "    foo = bar",
+    "",
+    "    [sec2]",
+    "    biz = baz",
+    "",
+    "  Result:",
+    "    $ ini -a conf < input.ini",
+    "    $ declare -p conf",
+    "    declare -A conf=([sec1]=\"true\" [sec2]=\"true\" )",
+    "    $ declare -p conf_sec1",
+    "    declare -A conf_sec1=([foo]=\"bar\" )",
+    "    $ declare -p conf_sec2",
+    "    declare -A conf_sec2=([biz]=\"baz\" )",
+    "",
+    "If the `-u FD` argument is passed the ini config is read from the `FD`",
+    "file descriptor rather than from stdin.",
     (char *)NULL};
 
 typedef struct {
@@ -33,13 +55,18 @@ static int handler(void *user, const char *section, const char *name,
     vflags |= (1 << 1);
     SHELL_VAR *toc_var = find_or_make_array_variable(toc_var_name, vflags);
     if (!toc_var) {
+      report_error("Could not make %s", toc_var_name);
       return 0;
     }
     bind_assoc_variable(toc_var, toc_var_name, strdup(section), "true", 0);
     return 1;
   }
-  if (!name || !value) {
-    report_error("ini name or value was NULL");
+  if (!name) {
+    report_error("Malformed ini, name is NULL!");
+    return 0;
+  }
+  if (!value) {
+    report_error("Malformed ini, value is NULL!");
     return 0;
   }
   char *sep = "_";
@@ -64,6 +91,7 @@ static int handler(void *user, const char *section, const char *name,
   vflags |= (1 << 1);
   SHELL_VAR *sec_var = find_or_make_array_variable(sec_var_name, vflags);
   if (!sec_var) {
+    report_error("Could not make %s", sec_var_name);
     free(sec_var_name);
     return 0;
   }
@@ -119,16 +147,16 @@ int ini_builtin(list) WORD_LIST *list;
 }
 
 struct builtin ini_struct = {
-    "ini",                    /* builtin name */
-    ini_builtin,              /* function implementing the builtin */
-    BUILTIN_ENABLED,          /* initial flags for builtin */
-    ini_doc,                  /* array of long documentation strings. */
-    "ini -a TOC_VAR [-u FD]", /* usage synopsis; becomes short_doc */
-    0                         /* reserved for internal use */
+    "ini",                /* builtin name */
+    ini_builtin,          /* function implementing the builtin */
+    BUILTIN_ENABLED,      /* initial flags for builtin */
+    ini_doc,              /* array of long documentation strings. */
+    "ini -a TOC [-u FD]", /* usage synopsis; becomes short_doc */
+    0                     /* reserved for internal use */
 };
 
-/* Called when builtin is enabled and loaded from the shared object.  If this
-   function returns 0, the load fails. */
+/* Called when builtin is enabled and loaded from the shared object. If this
+ * function returns 0, the load fails. */
 int ini_builtin_load(name) char *name;
 { return (1); }
 

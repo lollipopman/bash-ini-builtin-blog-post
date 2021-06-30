@@ -21,9 +21,9 @@
 -   [x] Create an associative array of all sections?
 -   [x] Remove hard coded `INI`
 -   [x] Add support for arbitrary fds, rather than just stdin
--   [ ] Error checking, malloc, return vals, etc?
--   [ ] Improve help, docs, code comments
--   [ ] Ask for feedback oh help-bash
+-   [x] Error checking, malloc, return vals, etc?
+-   [x] Improve help, docs, code comments
 -   [ ] Push out repo, test cloning
+-   [ ] Ask for feedback oh help-bash
 -   [ ] ︙
 -   [ ] ?
