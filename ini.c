@@ -1,13 +1,6 @@
-/* ini - read an ini file from standard input */
-
-#include <config.h>
-#if defined(HAVE_UNISTD_H)
-#include <unistd.h>
-#endif
 #include "inih/ini.h"
 #include "loadables.h"
 #include <errno.h>
-#include <stdio.h>
 
 char *ini_doc[] = {
     "Read an ini config from stdin input into a set of associative arrays.",

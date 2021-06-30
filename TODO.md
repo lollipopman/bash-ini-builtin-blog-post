@@ -23,7 +23,7 @@
 -   [x] Add support for arbitrary fds, rather than just stdin
 -   [x] Error checking, malloc, return vals, etc?
 -   [x] Improve help, docs, code comments
--   [ ] Push out repo, test cloning
+-   [x] Push out repo, test cloning
 -   [ ] Ask for feedback oh help-bash
 -   [ ] ︙
 -   [ ] ?
