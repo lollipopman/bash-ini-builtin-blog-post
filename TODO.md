@@ -19,8 +19,10 @@
 -   [x] vendor inih, rather than link?
 -   [x] Create an associative array per section
 -   [x] Create an associative array of all sections?
--   [ ] Remove hard coded `INI`
+-   [x] Remove hard coded `INI`
+-   [ ] Add support for arbitrary fds, rather than just stdin
 -   [ ] Error checking, malloc, return vals, etc?
--   [ ] Improve help & docs
+-   [ ] Improve help, docs, code comments
+-   [ ] Ask for feedback oh help-bash
 -   [ ] ︙
 -   [ ] ?

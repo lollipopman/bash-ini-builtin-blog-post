@@ -2,10 +2,10 @@
 set -o errexit
 
 enable -f ./ini.so ini
-ini <test.ini
+ini -a BUTTER <test.ini
 
-declare -p INI
-for ini_var in "${!INI[@]}"; do
-	declare -n ini='INI_'"$ini_var"
+declare -p BUTTER
+for ini_var in "${!BUTTER[@]}"; do
+	declare -n ini='BUTTER_'"$ini_var"
 	declare -p "${!ini}"
 done
