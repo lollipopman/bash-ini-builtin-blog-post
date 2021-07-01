@@ -63,16 +63,24 @@ static int handler(void *user, const char *section, const char *name,
     return 0;
   }
   char *sep = "_";
-  size_t sec_size = strlen(toc_var_name) + strlen(section) +
-                    2; // +1 for the null-terminator +1 for sep="_"
+  size_t sec_size = strlen(toc_var_name) + strlen(section) + strlen(sep) +
+                    1; // +1 for the null-terminator
   char *sec_var_name = malloc(sec_size);
-  char *sec_end = sec_var_name + sec_size;
+  char *sec_end = sec_var_name + sec_size - 1;
   char *p = memccpy(sec_var_name, toc_var_name, '\0', sec_size);
-  if (p) {
-    p = memccpy(p - 1, sep, '\0', sec_end - p);
+  if (!p) {
+    builtin_error("Unable to create section name");
+    return 0;
   }
-  if (p) {
-    memccpy(p - 1, section, '\0', sec_end - p);
+  p = memccpy(p - 1, sep, '\0', sec_end - p + 2);
+  if (!p) {
+    builtin_error("Unable to create section name");
+    return 0;
+  }
+  p = memccpy(p - 1, section, '\0', sec_end - p + 2);
+  if (!p) {
+    builtin_error("Unable to create section name");
+    return 0;
   }
   if (!legal_identifier(sec_var_name)) {
     sh_invalidid(sec_var_name);
