@@ -1,9 +1,7 @@
 # TODO
 
 -   [x] get lsp working
--   [x] Pick a C ini parser
-    -   [x] inih, picked
-    -   [x] <https://github.com/madmurphy/libconfini>
+-   [x] Pick a C ini parser, [inih](https://github.com/benhoyt/inih)
 -   [x] Get sample to compile
 -   [x] copy csv and build as a separate project
 -   [x] add inih lib
