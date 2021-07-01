@@ -24,7 +24,7 @@
 -   [x] Push out repo, test cloning
 -   [x] Improve comments
 -   [x] Improve testing
--   [ ] Add a simple readme
+-   [x] Add a simple readme
 -   [ ] Ask for feedback oh help-bash
 -   [ ] ︙
 -   [ ] ?
