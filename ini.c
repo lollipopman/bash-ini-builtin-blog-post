@@ -33,10 +33,15 @@ char *ini_doc[] = {
     "file descriptor rather than from stdin.",
     (char *)NULL};
 
+/* User data for inih callback handler */
 typedef struct {
   char *toc_var_name;
 } ini_conf;
 
+/* This is the inih handler called for every new section and for every name and
+ * value in a section. This function creates and populates our associative
+ * arrays in Bash. Both for the TOC array as well as for the individual section
+ * arrays, <TOC>_<INI_SECTION_NAME> */
 static int handler(void *user, const char *section, const char *name,
                    const char *value) {
   ini_conf *conf = (ini_conf *)user;
@@ -62,6 +67,7 @@ static int handler(void *user, const char *section, const char *name,
     builtin_error("Malformed ini, value is NULL!");
     return 0;
   }
+  /* Create <TOC>_<INI_SECTION_NAME> */
   char *sep = "_";
   size_t sec_size = strlen(toc_var_name) + strlen(section) + strlen(sep) +
                     1; // +1 for the null-terminator
@@ -101,6 +107,8 @@ static int handler(void *user, const char *section, const char *name,
   return 1;
 }
 
+/* This is essentially the main function for the ini builtin, it does arg
+ * parsing and then calls the inih function to parse the provided ini FD */
 int ini_builtin(list) WORD_LIST *list;
 {
   intmax_t intval;
@@ -147,11 +155,12 @@ int ini_builtin(list) WORD_LIST *list;
   return (EXECUTION_SUCCESS);
 }
 
+/* Provides Bash with information about the builtin */
 struct builtin ini_struct = {
-    "ini",                /* builtin name */
-    ini_builtin,          /* function implementing the builtin */
-    BUILTIN_ENABLED,      /* initial flags for builtin */
-    ini_doc,              /* array of long documentation strings. */
-    "ini -a TOC [-u FD]", /* usage synopsis; becomes short_doc */
-    0                     /* reserved for internal use */
+    "ini",                /* Builtin name */
+    ini_builtin,          /* Function implementing the builtin */
+    BUILTIN_ENABLED,      /* Initial flags for builtin */
+    ini_doc,              /* Array of long documentation strings. */
+    "ini -a TOC [-u FD]", /* Usage synopsis; becomes short_doc */
+    0                     /* Reserved for internal use */
 };
