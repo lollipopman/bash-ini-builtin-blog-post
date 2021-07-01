@@ -26,5 +26,6 @@
 -   [x] Improve testing
 -   [x] Add a simple readme
 -   [ ] Ask for feedback oh help-bash
+-   [ ] Write blog post
 -   [ ] ︙
 -   [ ] ?
