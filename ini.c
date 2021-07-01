@@ -155,12 +155,3 @@ struct builtin ini_struct = {
     "ini -a TOC [-u FD]", /* usage synopsis; becomes short_doc */
     0                     /* reserved for internal use */
 };
-
-/* Called when builtin is enabled and loaded from the shared object. If this
- * function returns 0, the load fails. */
-int ini_builtin_load(name) char *name;
-{ return (1); }
-
-/* Called when builtin is disabled. */
-void ini_builtin_unload(name) char *name;
-{}
