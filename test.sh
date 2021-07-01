@@ -17,3 +17,7 @@ done
 exec {ini_fd}<test.ini
 ini -a BUBBLES -u $ini_fd
 declare -p BUBBLES
+for ini_var in "${!BUBBLES[@]}"; do
+	declare -n ini='BUBBLES_'"$ini_var"
+	declare -p "${!ini}"
+done
