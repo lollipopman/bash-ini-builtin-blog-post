@@ -1,0 +1,6 @@
+declare -A BUTTER=([protocol]="true" [user]="true" )
+declare -A BUTTER_protocol=([version]="6" )
+declare -A BUTTER_user=([active]="true" [pi]="3.14159" [email]="bob@smith.com" [name]="Bob Smith" )
+declare -A BUBBLES=([protocol]="true" [user]="true" )
+declare -A BUBBLES_protocol=([version]="6" )
+declare -A BUBBLES_user=([active]="true" [pi]="3.14159" [email]="bob@smith.com" [name]="Bob Smith" )

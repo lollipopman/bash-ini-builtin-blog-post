@@ -23,7 +23,7 @@
 -   [x] Improve help, docs, code comments
 -   [x] Push out repo, test cloning
 -   [x] Improve comments
--   [ ] Improve testing
+-   [x] Improve testing
 -   [ ] Add a simple readme
 -   [ ] Ask for feedback oh help-bash
 -   [ ] ︙

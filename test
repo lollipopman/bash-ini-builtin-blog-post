@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+
+new=$(mktemp)
+bash test.sh >"$new"
+diff -u test_output "$new"

@@ -18,7 +18,8 @@ inih/ini.c:
 
 .PHONY: test
 test: ini.so
-	bash test.sh
+	./test
+	@echo Tests Passed
 
 .PHONY: clean
 clean:
