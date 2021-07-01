@@ -48,18 +48,18 @@ static int handler(void *user, const char *section, const char *name,
     vflags |= (1 << 1);
     SHELL_VAR *toc_var = find_or_make_array_variable(toc_var_name, vflags);
     if (!toc_var) {
-      report_error("Could not make %s", toc_var_name);
+      builtin_error("Could not make %s", toc_var_name);
       return 0;
     }
     bind_assoc_variable(toc_var, toc_var_name, strdup(section), "true", 0);
     return 1;
   }
   if (!name) {
-    report_error("Malformed ini, name is NULL!");
+    builtin_error("Malformed ini, name is NULL!");
     return 0;
   }
   if (!value) {
-    report_error("Malformed ini, value is NULL!");
+    builtin_error("Malformed ini, value is NULL!");
     return 0;
   }
   char *sep = "_";
@@ -92,7 +92,7 @@ static int handler(void *user, const char *section, const char *name,
   vflags |= (1 << 1);
   SHELL_VAR *sec_var = find_or_make_array_variable(sec_var_name, vflags);
   if (!sec_var) {
-    report_error("Could not make %s", sec_var_name);
+    builtin_error("Could not make %s", sec_var_name);
     free(sec_var_name);
     return 0;
   }
@@ -141,7 +141,7 @@ int ini_builtin(list) WORD_LIST *list;
   conf.toc_var_name = strdup(toc_var_name);
   FILE *file = fdopen(fd, "r");
   if (ini_parse_file(file, handler, &conf) < 0) {
-    report_error("Unable to read from fd: %d", fd);
+    builtin_error("Unable to read from fd: %d", fd);
     return (EXECUTION_FAILURE);
   }
   return (EXECUTION_SUCCESS);
