@@ -3,12 +3,12 @@
 #include <errno.h>
 
 char *ini_doc[] = {
-    "Read an ini config from stdin input into a set of associative arrays.",
+    "Read an INI config from stdin input into a set of associative arrays.",
     "",
-    "Reads an ini config from stdin input into a set of associative arrays.",
-    "The sections of the ini config are added to an associative array",
+    "Reads an INI config from stdin input into a set of associative arrays.",
+    "The sections of the INI config are added to an associative array",
     "specified by the `-a TOC` argument. The keys and values are then added to",
-    "associate arrays prefixed by the `TOC` name and suffixed by their ini",
+    "associate arrays prefixed by the `TOC` name and suffixed by their INI",
     "section name, `<TOC>_<INI_SECTION_NAME>`. A section name must be valid",
     "Bash variable name, otherwise an error is returned.",
     "",
@@ -30,7 +30,7 @@ char *ini_doc[] = {
     "    $ declare -p conf_sec2",
     "    declare -A conf_sec2=([biz]=\"baz\" )",
     "",
-    "If the `-u FD` argument is passed the ini config is read from the `FD`",
+    "If the `-u FD` argument is passed the INI config is read from the `FD`",
     "file descriptor rather than from stdin.",
     (char *)NULL};
 
