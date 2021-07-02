@@ -7,6 +7,9 @@ INIH_FLAGS:=-DINI_CALL_HANDLER_ON_NEW_SECTION=1 -DINI_STOP_ON_FIRST_ERROR=1 -DIN
 ini.so: libinih.o ini.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
+sleep.so: sleep.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
 %.o: %.c
 	$(CC) $(CFLAGS) $(INC) -o $@ $^
 
