@@ -173,6 +173,11 @@ int ini_builtin(list) WORD_LIST *list;
     return 0;
   }
   FILE *file = fdopen(fd, "r");
+  if (!file) {
+    builtin_error("%d: unable to open file descriptor: %s", fd,
+                  strerror(errno));
+    return (EXECUTION_FAILURE);
+  }
   if (ini_parse_file(file, handler, &conf) < 0) {
     builtin_error("Unable to read from fd: %d", fd);
     return (EXECUTION_FAILURE);
