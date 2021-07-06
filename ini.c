@@ -80,6 +80,7 @@ static int handler(void *user, const char *section, const char *name,
   if (!name && !value) {
     SHELL_VAR *toc_var = find_variable(toc_var_name);
     if (!toc_var) {
+      free(sec_var_name);
       builtin_error("Could not find %s", toc_var_name);
       return 0;
     }
@@ -96,13 +97,16 @@ static int handler(void *user, const char *section, const char *name,
       free(sec_var_name);
       return 0;
     }
+    free(sec_var_name);
     return 1;
   }
   if (!name) {
+    free(sec_var_name);
     builtin_error("Malformed ini, name is NULL!");
     return 0;
   }
   if (!value) {
+    free(sec_var_name);
     builtin_error("Malformed ini, value is NULL!");
     return 0;
   }
