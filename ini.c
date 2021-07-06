@@ -1,6 +1,7 @@
 #include "inih/ini.h"
 #include "loadables.h"
 #include <errno.h>
+#include <stdbool.h>
 
 char *ini_doc[] = {
     "Reads an INI config from stdin input into a set of associative arrays.",
@@ -31,12 +32,14 @@ char *ini_doc[] = {
     "    declare -A conf_sec2=([biz]=\"baz\" )",
     "",
     "If the `-u FD` argument is passed the INI config is read from the `FD`",
-    "file descriptor rather than from stdin.",
+    "file descriptor rather than from stdin. Variables are created with local",
+    "scope inside a function unless the `-g` option is specified.",
     (char *)NULL};
 
 /* User data for inih callback handler */
 typedef struct {
   char *toc_var_name;
+  bool local_vars;
 } ini_conf;
 
 /* This is the inih handler called for every new section and for every name and
@@ -47,27 +50,6 @@ static int handler(void *user, const char *section, const char *name,
                    const char *value) {
   ini_conf *conf = (ini_conf *)user;
   char *toc_var_name = conf->toc_var_name;
-  int vflags;
-  if (!name && !value) {
-    vflags = 0;
-    vflags |= (1 << 0);
-    vflags |= (1 << 1);
-    SHELL_VAR *toc_var = find_or_make_array_variable(toc_var_name, vflags);
-    if (!toc_var) {
-      builtin_error("Could not make %s", toc_var_name);
-      return 0;
-    }
-    bind_assoc_variable(toc_var, toc_var_name, strdup(section), "true", 0);
-    return 1;
-  }
-  if (!name) {
-    builtin_error("Malformed ini, name is NULL!");
-    return 0;
-  }
-  if (!value) {
-    builtin_error("Malformed ini, value is NULL!");
-    return 0;
-  }
   /* Create <TOC>_<INI_SECTION_NAME> */
   char *sep = "_";
   size_t sec_size = strlen(toc_var_name) + strlen(section) + strlen(sep) +
@@ -94,15 +76,37 @@ static int handler(void *user, const char *section, const char *name,
     free(sec_var_name);
     return 0;
   }
-  vflags = 0;
-  vflags |= (1 << 0);
-  vflags |= (1 << 1);
-  SHELL_VAR *sec_var = find_or_make_array_variable(sec_var_name, vflags);
-  if (!sec_var) {
-    builtin_error("Could not make %s", sec_var_name);
-    free(sec_var_name);
+  /* New section parsed */
+  if (!name && !value) {
+    SHELL_VAR *toc_var = find_variable(toc_var_name);
+    if (!toc_var) {
+      builtin_error("Could not find %s", toc_var_name);
+      return 0;
+    }
+    bind_assoc_variable(toc_var, toc_var_name, strdup(section), "true", 0);
+    SHELL_VAR *sec_var = NULL;
+    if (conf->local_vars) {
+      int vflags = 0;
+      sec_var = make_local_assoc_variable(sec_var_name, vflags);
+    } else {
+      sec_var = make_new_assoc_variable(sec_var_name);
+    }
+    if (!sec_var) {
+      builtin_error("Could not make %s", sec_var_name);
+      free(sec_var_name);
+      return 0;
+    }
+    return 1;
+  }
+  if (!name) {
+    builtin_error("Malformed ini, name is NULL!");
     return 0;
   }
+  if (!value) {
+    builtin_error("Malformed ini, value is NULL!");
+    return 0;
+  }
+  SHELL_VAR *sec_var = find_variable(sec_var_name);
   bind_assoc_variable(sec_var, sec_var_name, strdup(name), strdup(value), 0);
   free(sec_var_name);
   return 1;
@@ -115,12 +119,16 @@ int ini_builtin(list) WORD_LIST *list;
   intmax_t intval;
   int opt, code;
   int fd = 0;
+  bool global_vars = false;
   char *toc_var_name = NULL;
   reset_internal_getopt();
-  while ((opt = internal_getopt(list, "a:u:")) != -1) {
+  while ((opt = internal_getopt(list, "a:gu:")) != -1) {
     switch (opt) {
     case 'a':
       toc_var_name = list_optarg;
+      break;
+    case 'g':
+      global_vars = true;
       break;
     case 'u':
       code = legal_number(list_optarg, &intval);
@@ -147,7 +155,23 @@ int ini_builtin(list) WORD_LIST *list;
     return (EX_USAGE);
   }
   ini_conf conf = {};
-  conf.toc_var_name = strdup(toc_var_name);
+  conf.toc_var_name = toc_var_name;
+  if ((variable_context > 0) && (global_vars == false)) {
+    conf.local_vars = true;
+  } else {
+    conf.local_vars = false;
+  }
+  SHELL_VAR *toc_var = NULL;
+  if (conf.local_vars) {
+    int vflags = 0;
+    toc_var = make_local_assoc_variable(toc_var_name, vflags);
+  } else {
+    toc_var = make_new_assoc_variable(toc_var_name);
+  }
+  if (!toc_var) {
+    builtin_error("Could not make %s", toc_var_name);
+    return 0;
+  }
   FILE *file = fdopen(fd, "r");
   if (ini_parse_file(file, handler, &conf) < 0) {
     builtin_error("Unable to read from fd: %d", fd);
@@ -158,10 +182,10 @@ int ini_builtin(list) WORD_LIST *list;
 
 /* Provides Bash with information about the builtin */
 struct builtin ini_struct = {
-    "ini",                /* Builtin name */
-    ini_builtin,          /* Function implementing the builtin */
-    BUILTIN_ENABLED,      /* Initial flags for builtin */
-    ini_doc,              /* Array of long documentation strings. */
-    "ini -a TOC [-u FD]", /* Usage synopsis; becomes short_doc */
-    0                     /* Reserved for internal use */
+    "ini",                     /* Builtin name */
+    ini_builtin,               /* Function implementing the builtin */
+    BUILTIN_ENABLED,           /* Initial flags for builtin */
+    ini_doc,                   /* Array of long documentation strings. */
+    "ini -a TOC [-u FD] [-g]", /* Usage synopsis; becomes short_doc */
+    0                          /* Reserved for internal use */
 };
