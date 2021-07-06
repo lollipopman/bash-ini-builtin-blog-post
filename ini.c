@@ -154,6 +154,12 @@ int ini_builtin(list) WORD_LIST *list;
     builtin_usage();
     return (EX_USAGE);
   }
+  FILE *file = fdopen(fd, "r");
+  if (!file) {
+    builtin_error("%d: unable to open file descriptor: %s", fd,
+                  strerror(errno));
+    return (EXECUTION_FAILURE);
+  }
   ini_conf conf = {};
   conf.toc_var_name = toc_var_name;
   if ((variable_context > 0) && (global_vars == false)) {
@@ -171,12 +177,6 @@ int ini_builtin(list) WORD_LIST *list;
   if (!toc_var) {
     builtin_error("Could not make %s", toc_var_name);
     return 0;
-  }
-  FILE *file = fdopen(fd, "r");
-  if (!file) {
-    builtin_error("%d: unable to open file descriptor: %s", fd,
-                  strerror(errno));
-    return (EXECUTION_FAILURE);
   }
   if (ini_parse_file(file, handler, &conf) < 0) {
     builtin_error("Unable to read from fd: %d", fd);
