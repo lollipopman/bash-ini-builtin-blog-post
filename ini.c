@@ -3,14 +3,14 @@
 #include <errno.h>
 
 char *ini_doc[] = {
-    "Read an INI config from stdin input into a set of associative arrays.",
+    "Reads an INI config from stdin input into a set of associative arrays.",
     "",
     "Reads an INI config from stdin input into a set of associative arrays.",
     "The sections of the INI config are added to an associative array",
     "specified by the `-a TOC` argument. The keys and values are then added to",
     "associate arrays prefixed by the `TOC` name and suffixed by their INI",
-    "section name, `<TOC>_<INI_SECTION_NAME>`. A section name must be valid",
-    "Bash variable name, otherwise an error is returned.",
+    "section name, `<TOC>_<INI_SECTION_NAME>`. The parsed INI section names",
+    "must be valid Bash variable names, otherwise an error is returned.",
     "",
     "Example:",
     "",
