@@ -4,7 +4,7 @@
 
 Shell languages such as Bash excel at certain tasks, such as gluing
 programs together or quickly automating a set of command line steps. In
-contrast to those strenghs using a Shell to parse an
+contrast to those strengths using a Shell to parse an
 [INI](https://en.wikipedia.org/wiki/INI_file) config file, is a bit like
 writing a poem in the snow, you might succeed, but the result will
 probably be inscrutable and your [swear
@@ -42,9 +42,9 @@ Why are builtins helpful? Why not just rely entirely on external
 commands? You could build a shell with a minimal set of builtins, but
 certain builtins are still necessary. For example the `cd` command must
 be a builtin, since calling `chdir(2)` in a forked process will have no
-effect on the parrent shell. The shell must execute the `cd` and thus
-the `chdir(2)` call in its own process. There are at least three cases
-where builtins are necessary or useful:
+effect on the parent shell. The shell must execute the `cd` and thus the
+`chdir(2)` call in its own process. There are at least three cases where
+builtins are necessary or useful:
 
 1.  Avoiding the need to fork an external process.
 
@@ -55,7 +55,7 @@ where builtins are necessary or useful:
 
 Our INI config parser builtin will demonstrate the utility of reason
 number (3). However, before we implement that builtin, let us look at
-implementing a `sleep` builtin as a custom builtin challege akin to
+implementing a `sleep` builtin as a custom builtin challenge akin to
 printing `Hello World!` in a new language.
 
 ## Minimal Builtin, Implementing `sleep`
@@ -189,7 +189,7 @@ struct builtin ini_struct = {
 
 As we did with the `sleep` builtin we initialize a `builtin` struct that
 includes our `ini_doc` array as well as our short doc string. The second
-member of the scruct is the `sh_builtin_func_t` which is the `main`
+member of the struct is the `sh_builtin_func_t` which is the `main`
 function of our builtin.
 
 ### Parsing Options and Reading Stdin
@@ -492,9 +492,9 @@ innovation and improvement on the use and distribution of Bash builtins!
 
 ## Further Reading
 
-1.  [ini builtin full source
-    code](https://github.com/lollipopman/bash-ini-builtin-blog-post)
-2.  [inih library used to parse the INI
+1.  [The full source code of the ini
+    builtin](https://github.com/lollipopman/bash-ini-builtin-blog-post)
+2.  [The inih library used to parse the INI
     configs](https://github.com/benhoyt/inih)
-3.  [Bash builtin
-    examples](https://git.savannah.gnu.org/cgit/bash.git/tree/examples/loadables)
+3.  [Bash builtin examples from Bash's source
+    code](https://git.savannah.gnu.org/cgit/bash.git/tree/examples/loadables)
