@@ -6,19 +6,19 @@ Shell languages such as Bash excel at certain tasks, such as gluing
 programs together or quickly automating a set of command line steps. In
 contrast to those strengths using a Shell to parse an
 [INI](https://en.wikipedia.org/wiki/INI_file) config file, is a bit like
-writing a poem in the snow, you might succeed, but the result will
-probably be inscrutable and your [swear
+writing a poem in mud, you might succeed, but the result will probably
+be inscrutable and your [swear
 jar](https://en.wikipedia.org/wiki/Swear_jar) will be full! As this
-wonderful [stackoverflow
+wonderful [Stack Overflow
 post](https://stackoverflow.com/questions/6318809/how-do-i-grab-an-ini-value-within-a-shell-script)
 attests there any many different ways to parse an INI file in Bash, but
-few of the answers provided are elegant!
+few of the answers provided are elegant.
 
 So if you have a task poorly suited to Bash, what are your options?
 
-1.  Choose another language, perhaps sensible, but not always fun?!
+1.  Choose another language, perhaps sensible, but not always fun?
 
-2.  Use a custom Bash builtin to extend Bash!? (Spoiler this is the
+2.  Use a custom Bash builtin to extend Bash? (Spoiler, this is the
     route we will choose!)
 
 ## What is a Bash Builtin?
@@ -27,12 +27,12 @@ A builtin is a command in Bash that is implemented in the shell itself,
 rather than as a separate program. They are typically implemented in the
 language used to write the shell itself, so C in the case of Bash. Some
 of Bash's builtins are also available as separate commands, depending on
-how the OS is configured. For example `printf` is a Bash builtin, but is
-also usually available on a Linux box as a separate program, try
+how your OS is configured. For example `printf` is a Bash builtin, but
+is also usually available on a Linux box as a separate program, try
 `which printf` to find out. If you type `help` in Bash you get a list of
-all the currently enabled builtins, or you can run `type printf` to
+all the currently enabled builtins, or you can use `type printf` to
 check if a specific command is a builtin. Builtins are preferred in Bash
-over external programs, as if they were placed first in your `$PATH`.
+over external programs, as if they were placed first in your `PATH`.
 Bash also allows you to write your own custom builtins and load them
 into the shell, as does Zsh and the KornShell.
 
@@ -54,20 +54,20 @@ builtins are necessary or useful:
 3.  Modifying a shell's internal state, e.g. adding a variable.
 
 Our INI config parser builtin will demonstrate the utility of reason
-number (3). However, before we implement that builtin, let us look at
-implementing a `sleep` builtin as a custom builtin challenge akin to
-printing `Hello World!` in a new language.
+number (3). However, before we implement that builtin, let us try
+implementing `sleep` as a builtin. Implementing `sleep` is a custom
+builtin challenge akin to printing `Hello World!` in a new language.
 
 ## Minimal Builtin, Implementing `sleep`
 
 Everyone needs sleep, but it can be costly in Bash. We had a program
-ironically slow down by seconds after a
+that ironically slowed down after a
 [spinner](https://en.wikipedia.org/wiki/Throbber#Spinning_wheel) was
 added to provide feedback to the user that the program was running. The
 spinner called `sleep 0.04` in a loop while printing the spinner
-characters to the screen. The 25 forked processes per second actually
-slowed down the program! Bash does have a sleep builtin, but it is not
-enabled by default, let's look at a simple implementation:
+characters to the screen. The creation of 25 forked processes per second
+actually slowed down the program! Bash does have a sleep builtin, but it
+is not enabled by default, let's create a simple implementation:
 
 ``` C
 #include "loadables.h"
@@ -108,7 +108,7 @@ provide a function here, `sleep_builtin`, which is essentially our
 builtin's `main`. This function is supplied any args provided to our
 builtin. In our `sleep_builtin` function we check if we have an arg,
 then if we do we try to convert the arg to an integer and `sleep(3)` for
-that number of seconds. Let's try it out!
+that number of seconds. Let's try it out:
 
 ``` bash
 $ enable -f ./sleep.so sleep
@@ -125,9 +125,9 @@ bash: sleep: Unable to convert `⏰` to an integer
 
 Fabulous, so with a small amount of code and minimal boilerplate we have
 created a dynamically loaded Bash builtin! The sleep builtin satisfies
-reason number (1) on why you would write a builtin, i.e. to eliminate
-the need to fork a process, i.e. bring back the spinner! But, it does
-not satisfy reason number (3), changing Bash's internal state. Let's
+reason number (1) on why you might write a builtin, i.e. to eliminate
+the need to fork a process, so bring back the spinner! But, it does not
+satisfy reason number (3), changing Bash's internal state. Let's
 implement an INI parser to satisfy reason number (3) and provide a more
 complete example of creating a Bash builtin.
 
@@ -187,7 +187,7 @@ struct builtin ini_struct = {
 };
 ```
 
-As we did with the `sleep` builtin we initialize a `builtin` struct that
+As we did with the `sleep` builtin we initialize a `struct builtin` that
 includes our `ini_doc` array as well as our short doc string. The second
 member of the struct is the `sh_builtin_func_t` which is the `main`
 function of our builtin.
@@ -258,7 +258,7 @@ int ini_builtin(list) WORD_LIST *list;
 ### Modifying Bash's Internal State, Injecting Data
 
 The INI builtin creates a `TOC` or table of contents associate array
-specifying which INI sections were found. For each INI section it
+specifying which INI sections were found. Then for each INI section it
 creates a `<TOC>_<INI_SECTION_NAME>` associative array. First we create
 the `TOC` var:
 
@@ -299,7 +299,7 @@ variables(`make_new_assoc_variable`). Once we have created our `TOC`
 variable we call the `ini_parse_file` function with our file, config,
 and handler function. We are using the excellent
 [inih](https://github.com/benhoyt/inih) library to do the heavy lifting
-of parsing the INI, but we need to implement the handler function:
+of parsing the INI, but we do need to implement the handler function:
 
 ``` C
 /* This is the inih handler called for every new section and for every name and
@@ -422,10 +422,10 @@ clean:
   rm -f *.o *.so
 ```
 
-We compile our `ini.c` file as well as the `inih` and then link them
-together into a shared library. Our testing is rudimentary, we have a
-test Bash script which exercises the features of our builtin and we
-compare the output from out tests with a canonical version.
+We compile our `ini.c` file as well as the `inih` library, then we link
+them together into a shared library. Our testing methodology is
+rudimentary, we have a Bash script which exercises the features of our
+builtin and we compare its output against a canonical copy:
 
 ``` bash
 #!/bin/bash
@@ -469,16 +469,17 @@ declare -A rss_conf_Computers=([www.linusakesson.net]="http://www.linusakesson.n
 
 Our `TOC` var `rss_conf` holds our section names, then we use Bash's
 nameref functionality to point a variable to each associative array for
-a given INI section from `rss_conf`.
+a given INI section from `rss_conf`. Now that we have the RSS config
+loaded, we *just* need to build the application.
 
 ## Closing Thoughts
 
-Bash builtins provide an interesting avenue to extending Bash for tasks
-which are perhaps ill suited for the Bash language itself. They also
-allow Bash to leverage the vast number of existing well tested and
-established C libraries. Bash provides a good framework for builtins and
-a set of functions that makes modifying Bash's internal state straight
-forward.
+Bash builtins provide an interesting avenue for extending Bash to
+perform tasks which are perhaps ill suited to be written in the Bash
+language. Builtins also allow Bash to leverage the vast number of well
+tested and established C libraries. As was demonstrated in the examples,
+Bash provides a good framework for builtins and a set of functions that
+makes modifying Bash's internal state straight forward.
 
 Given the positives of Bash builtins, why aren't there more of them?
 There are two possibilities that stand out:
@@ -492,7 +493,7 @@ innovation and improvement on the use and distribution of Bash builtins!
 
 ## Further Reading
 
-1.  [The full source code of the ini
+1.  [The full source code of this ini
     builtin](https://github.com/lollipopman/bash-ini-builtin-blog-post)
 2.  [The inih library used to parse the INI
     configs](https://github.com/benhoyt/inih)
