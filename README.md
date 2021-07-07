@@ -474,22 +474,25 @@ loaded, we *just* need to build the application.
 
 ## Closing Thoughts
 
-Bash builtins provide an interesting avenue for extending Bash to
-perform tasks which are perhaps ill suited to be written in the Bash
-language. Builtins also allow Bash to leverage the vast number of well
-tested and established C libraries. As was demonstrated in the examples,
-Bash provides a good framework for builtins and a set of functions that
-makes modifying Bash's internal state straight forward.
+Bash builtins provide a number of positive features. They provide an
+interesting avenue for extending Bash to perform tasks which are perhaps
+ill suited to be written in the Bash language. Builtins also allow Bash
+to leverage the vast number of well tested and established C libraries.
+Finally, as was demonstrated in the examples, Bash provides a good
+framework for builtins and a set of functions that makes modifying
+Bash's internal state straight forward.
 
-Given the positives of Bash builtins, why aren't there more of them?
-There are two possibilities that stand out:
+Given the positives of Bash builtins, why aren't there
+[more](https://github.com/search?o=desc&q=bash+builtin+language%3AC&s=stars&type=Repositories)
+of them? There are two possibilities that stand out:
 
 1.  The intersection of people that write Bash and C is rather small?
 2.  The distribution of custom Bash builtins is not well paved, limiting
     their utility?
 
 The second possibility rings the most true to me, I would love to see
-innovation and improvement on the use and distribution of Bash builtins!
+innovation and improvement on the use and distribution of Bash builtins,
+bring your ideas!
 
 ## Further Reading
 
