@@ -1,11 +1,3 @@
-# Outline
-
-## Goals
-
--   Educate people about the ability to extend Bash via builtins.
--   Provide motivation for why builtins are helpful.
--   Teach people how to write a builtin
-
 # Writing a Bash Builtin in C to Parse INI Configs
 
 ## Why Not Just Parse INI Configs With Bash?
