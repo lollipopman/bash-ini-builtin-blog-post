@@ -4,14 +4,14 @@
 
 Shell languages such as Bash excel at certain tasks, such as gluing
 programs together or quickly automating a set of command line steps. In
-contrast to those strengths using a Shell to parse an
-[INI](https://en.wikipedia.org/wiki/INI_file) config file, is a bit like
+contrast to those strengths, using a Shell to parse an
+[INI](https://en.wikipedia.org/wiki/INI_file) config file is a bit like
 writing a poem in mud, you might succeed, but the result will probably
 be inscrutable and your [swear
 jar](https://en.wikipedia.org/wiki/Swear_jar) will be full! As this
-wonderful [Stack Overflow
-post](https://stackoverflow.com/questions/6318809/how-do-i-grab-an-ini-value-within-a-shell-script)
-attests there any many different ways to parse an INI file in Bash, but
+wonderful Stack Overflow
+[post](https://stackoverflow.com/questions/6318809/how-do-i-grab-an-ini-value-within-a-shell-script)
+attests there are many different ways to parse an INI file in Bash, but
 few of the answers provided are elegant.
 
 So if you have a task poorly suited to Bash, what are your options?
@@ -48,8 +48,8 @@ builtins are necessary or useful:
 
 1.  Avoiding the need to fork an external process.
 
-2.  Calling a system function that affect the shell process itself, e.g.
-    `chdir(2)`.
+2.  Calling a system function that affects the shell process itself,
+    e.g. `chdir(2)`.
 
 3.  Modifying a shell's internal state, e.g. adding a variable.
 
@@ -105,8 +105,8 @@ struct builtin sleep_struct = {
 
 The `struct builtin` is what informs Bash about our builtin. Notably we
 provide a function here, `sleep_builtin`, which is essentially our
-builtin's `main`. This function is supplied any args provided to our
-builtin. In our `sleep_builtin` function we check if we have an arg,
+builtin's `main`. This function is supplied with any args provided to
+our builtin. In our `sleep_builtin` function we check if we have an arg,
 then if we do we try to convert the arg to an integer and `sleep(3)` for
 that number of seconds. Let's try it out:
 
@@ -135,7 +135,7 @@ complete example of creating a Bash builtin.
 
 ### Generating Help Output
 
-First we will create our `help ini` doc which provides the builtin
+First we'll create our `help ini` doc which provides the builtin
 documentation inside of Bash. This help text provides an overview of how
 our INI parser will affect Bash's state:
 
@@ -381,7 +381,7 @@ In the handler we create our `sec_var_name` or
 `<TOC>_<INI_SECTION_NAME>` string. Then if the handler was called at the
 start of a new section we create an associative array for that section.
 Otherwise, we use Bash's `find_variable` function to retrieve our
-existing variable. Once we have our variable Bash provides functions to
+existing variable. Once we have our variable, Bash provides functions to
 alter a variable's value. Here we use `bind_assoc_variable` to populate
 an entry in our associative array with the name and value from the ini
 parser.
@@ -480,7 +480,7 @@ ill suited to be written in the Bash language. Builtins also allow Bash
 to leverage the vast number of well tested and established C libraries.
 Finally, as was demonstrated in the examples, Bash provides a good
 framework for builtins and a set of functions that makes modifying
-Bash's internal state straight forward.
+Bash's internal state straightforward.
 
 Given the positives of Bash builtins, why aren't there
 [more](https://github.com/search?o=desc&q=bash+builtin+language%3AC&s=stars&type=Repositories)
