@@ -16,10 +16,11 @@ few of the answers provided are elegant.
 
 So if you have a task poorly suited to Bash, what are your options?
 
-1.  Choose another language, perhaps sensible, but not always fun?
+1.  Choose another language for the task, perhaps sensible, but not
+    always fun?
 
-2.  Use a custom Bash builtin to extend Bash? (Spoiler, this is the
-    route we will choose!)
+2.  Use a custom Bash builtin to extend Bash for the task? (Spoiler,
+    this is the route we will choose!)
 
 ## What is a Bash Builtin?
 
@@ -43,8 +44,8 @@ commands? You could build a shell with a minimal set of builtins, but
 certain builtins are still necessary. For example the `cd` command must
 be a builtin, since calling `chdir(2)` in a forked process will have no
 effect on the parent shell. The shell must execute the `cd` and thus the
-`chdir(2)` call in its own process. There are at least three cases where
-builtins are necessary or useful:
+`chdir(2)` call in its own process. Including the `cd` example there are
+at least three cases where builtins are necessary or useful:
 
 1.  Avoiding the need to fork an external process.
 
@@ -54,7 +55,7 @@ builtins are necessary or useful:
 3.  Modifying a shell's internal state, e.g. adding a variable.
 
 Our INI config parser builtin will demonstrate the utility of reason
-number (3). However, before we implement that builtin, let us try
+number *(3)*. However, before we implement that builtin, let us try
 implementing `sleep` as a builtin. Implementing `sleep` is a custom
 builtin challenge akin to printing `Hello World!` in a new language.
 
@@ -107,8 +108,8 @@ The `struct builtin` is what informs Bash about our builtin. Notably we
 provide a function here, `sleep_builtin`, which is essentially our
 builtin's `main`. This function is supplied with any args provided to
 our builtin. In our `sleep_builtin` function we check if we have an arg,
-then if we do we try to convert the arg to an integer and `sleep(3)` for
-that number of seconds. Let's try it out:
+if so, we try to convert the arg to an integer and `sleep(3)` for that
+number of seconds. Let's try it out:
 
 ``` bash
 $ enable -f ./sleep.so sleep
@@ -125,11 +126,11 @@ bash: sleep: Unable to convert `⏰` to an integer
 
 Fabulous, so with a small amount of code and minimal boilerplate we have
 created a dynamically loaded Bash builtin! The sleep builtin satisfies
-reason number (1) on why you might write a builtin, i.e. to eliminate
-the need to fork a process, so bring back the spinner! But, it does not
-satisfy reason number (3), changing Bash's internal state. Let's
-implement an INI parser to satisfy reason number (3) and provide a more
-complete example of creating a Bash builtin.
+reason number *(1)* on why you might write a builtin, i.e. to eliminate
+the need to fork a process. So, bring back the spinner! But, it does not
+satisfy reason number *(3)*, changing Bash's internal state. Let's
+implement an INI parser to satisfy reason number *(3)* and provide a
+more complete example of creating a Bash builtin.
 
 ## Writing an INI Parser Builtin
 
@@ -146,7 +147,7 @@ char *ini_doc[] = {
     "Reads an INI config from stdin input into a set of associative arrays.",
     "The sections of the INI config are added to an associative array",
     "specified by the `-a TOC` argument. The keys and values are then added to",
-    "associate arrays prefixed by the `TOC` name and suffixed by their INI",
+    "associative arrays prefixed by the `TOC` name and suffixed by their INI",
     "section name, `<TOC>_<INI_SECTION_NAME>`. The parsed INI section names",
     "must be valid Bash variable names, otherwise an error is returned.",
     "",
@@ -257,7 +258,7 @@ int ini_builtin(list) WORD_LIST *list;
 
 ### Modifying Bash's Internal State, Injecting Data
 
-The INI builtin creates a `TOC` or table of contents associate array
+The INI builtin creates a `TOC` or table of contents associative array
 specifying which INI sections were found. Then for each INI section it
 creates a `<TOC>_<INI_SECTION_NAME>` associative array. First we create
 the `TOC` var:
@@ -290,11 +291,11 @@ return (EXECUTION_SUCCESS);
 /* snip */
 ```
 
-We check the `variable_context` to see if it is greater than zero which
-indicates we are in a function. If we are in a function we create local
-variables, unless the `-g` option was passed to our builtin. We then
-setup our config for our INI parser. Bash provides functions to create
-local(`make_local_assoc_variable`) and global
+We check Bash's `variable_context` to see if it is greater than zero
+which indicates we are in a function. If we are in a function we create
+local variables, unless the `-g` option was passed to our builtin. We
+then setup our config for our INI parser. Bash provides functions to
+create local(`make_local_assoc_variable`) and global
 variables(`make_new_assoc_variable`). Once we have created our `TOC`
 variable we call the `ini_parse_file` function with our file, config,
 and handler function. We are using the excellent
@@ -313,7 +314,7 @@ static int handler(void *user, const char *section, const char *name,
   /* Create <TOC>_<INI_SECTION_NAME> */
   char *sep = "_";
   size_t sec_size = strlen(toc_var_name) + strlen(section) + strlen(sep) +
-                    1; // +1 for the null-terminator
+                    1; // +1 for the NUL character
   char *sec_var_name = malloc(sec_size);
   char *sec_end = sec_var_name + sec_size - 1;
   char *p = memccpy(sec_var_name, toc_var_name, '\0', sec_size);
@@ -383,12 +384,12 @@ start of a new section we create an associative array for that section.
 Otherwise, we use Bash's `find_variable` function to retrieve our
 existing variable. Once we have our variable, Bash provides functions to
 alter a variable's value. Here we use `bind_assoc_variable` to populate
-an entry in our associative array with the name and value from the ini
+an entry in our associative array with the name and value from the INI
 parser.
 
 ### Building & Testing
 
-We put together a little `Makefile` to build and test our builtin:
+We put together a little `Makefile` to build and test our builtins:
 
 ``` make
 CC:=gcc
@@ -470,16 +471,16 @@ declare -A rss_conf_Computers=([www.linusakesson.net]="http://www.linusakesson.n
 Our `TOC` var `rss_conf` holds our section names, then we use Bash's
 nameref functionality to point a variable to each associative array for
 a given INI section from `rss_conf`. Now that we have the RSS config
-loaded, we *just* need to build the application.
+loaded, we *just* need to build the application to consume it!
 
 ## Closing Thoughts
 
 Bash builtins provide a number of positive features. They provide an
 interesting avenue for extending Bash to perform tasks which are perhaps
-ill suited to be written in the Bash language. Builtins also allow Bash
-to leverage the vast number of well tested and established C libraries.
-Finally, as was demonstrated in the examples, Bash provides a good
-framework for builtins and a set of functions that makes modifying
+ill suited to be written in the Bash language. Builtins allow Bash to
+leverage the vast quantity of well tested and established C libraries.
+Finally, as was hopefully demonstrated in the examples, Bash provides a
+good framework for builtins and a set of functions that makes modifying
 Bash's internal state straightforward.
 
 Given the positives of Bash builtins, why aren't there

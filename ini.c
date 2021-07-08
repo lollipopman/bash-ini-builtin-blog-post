@@ -9,7 +9,7 @@ char *ini_doc[] = {
     "Reads an INI config from stdin input into a set of associative arrays.",
     "The sections of the INI config are added to an associative array",
     "specified by the `-a TOC` argument. The keys and values are then added to",
-    "associate arrays prefixed by the `TOC` name and suffixed by their INI",
+    "associative arrays prefixed by the `TOC` name and suffixed by their INI",
     "section name, `<TOC>_<INI_SECTION_NAME>`. The parsed INI section names",
     "must be valid Bash variable names, otherwise an error is returned.",
     "",
@@ -53,7 +53,7 @@ static int handler(void *user, const char *section, const char *name,
   /* Create <TOC>_<INI_SECTION_NAME> */
   char *sep = "_";
   size_t sec_size = strlen(toc_var_name) + strlen(section) + strlen(sep) +
-                    1; // +1 for the null-terminator
+                    1; // +1 for the NUL character
   char *sec_var_name = malloc(sec_size);
   char *sec_end = sec_var_name + sec_size - 1;
   char *p = memccpy(sec_var_name, toc_var_name, '\0', sec_size);
