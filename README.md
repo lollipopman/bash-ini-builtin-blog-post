@@ -492,8 +492,11 @@ of them? There are two possibilities that stand out:
     their utility?
 
 The second possibility rings the most true to me, I would love to see
-innovation and improvement on the use and distribution of Bash builtins,
-bring your ideas!
+innovation and improvement on the use and distribution of Bash builtins.
+Ideally you could enable your builtins and they would be fetched along
+with your main script and packed into a single binary, perhaps something
+akin to [ruby-packer](https://github.com/pmq20/ruby-packer) but for
+Bash. Bring your ideas!
 
 ## Further Reading
 
