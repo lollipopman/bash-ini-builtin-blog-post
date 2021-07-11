@@ -16,36 +16,41 @@ few of the answers provided are elegant.
 
 So if you have a task poorly suited to Bash, what are your options?
 
-1.  Choose another language for the task, perhaps sensible, but not
-    always fun?
+1.  Choose another language for the task? (Perhaps sensible, but not
+    always fun.)
 
-2.  Use a custom Bash builtin to extend Bash for the task? (Spoiler,
+2.  Write a custom Bash builtin to extend Bash for the task? (Spoiler,
     this is the route we will choose!)
 
 ## What is a Bash Builtin?
 
 A builtin is a command in Bash that is implemented in the shell itself,
-rather than as a separate program. They are typically implemented in the
-language used to write the shell itself, so C in the case of Bash. Some
+rather than as a separate program. They are the 🔋🔋 included with Bash.
+If you type `help` in Bash you get a list of all the currently enabled
+builtins, or you can use `type printf` to check if a specific command is
+a builtin. Many of the commands you use regularly are builtins, e.g.
+`echo`, `printf`, and `cd`. They are typically implemented in the
+language used to write the shell itself, so in the case of Bash C. Some
 of Bash's builtins are also available as separate commands, depending on
 how your OS is configured. For example `printf` is a Bash builtin, but
-is also usually available on a Linux box as a separate program, try
-`which printf` to find out. If you type `help` in Bash you get a list of
-all the currently enabled builtins, or you can use `type printf` to
-check if a specific command is a builtin. Builtins are preferred in Bash
-over external programs, as if they were placed first in your `PATH`.
-Bash also allows you to write your own custom builtins and load them
-into the shell, as does Zsh and the KornShell.
+it is also usually available on a Linux box as a separate program, try
+`which printf` to find out. Builtins are preferred in Bash over external
+programs, as if they were placed first in your `PATH`. Bash also allows
+you to write your own custom builtins and load them into the shell, as
+does Zsh and the KornShell.
 
 ## Why Would You Write a Builtin?
 
-Why are builtins helpful? Why not just rely entirely on external
-commands? You could build a shell with a minimal set of builtins, but
-certain builtins are still necessary. For example the `cd` command must
-be a builtin, since calling `chdir(2)` in a forked process will have no
-effect on the parent shell. The shell must execute the `cd` and thus the
-`chdir(2)` call in its own process. Including the `cd` example there are
-at least three cases where builtins are necessary or useful:
+-   Why are builtins helpful?
+-   Why not just rely entirely on external commands?
+
+You could build a shell with a minimal set of builtins, but certain
+builtins are still necessary. For example the `cd` command must be a
+builtin, since calling `chdir(2)` in a forked process will have no
+effect on the parent shell process. The shell must execute the `cd` and
+thus the `chdir(2)` call in its own process. There are at least three
+cases, including the `cd` example, where builtins are necessary or
+useful:
 
 1.  Avoiding the need to fork an external process.
 
@@ -64,11 +69,12 @@ builtin challenge akin to printing `Hello World!` in a new language.
 Everyone needs sleep, but it can be costly in Bash. We had a program
 that ironically slowed down after a
 [spinner](https://en.wikipedia.org/wiki/Throbber#Spinning_wheel) was
-added to provide feedback to the user that the program was running. The
-spinner called `sleep 0.04` in a loop while printing the spinner
-characters to the screen. The creation of 25 forked processes per second
-actually slowed down the program! Bash does have a sleep builtin, but it
-is not enabled by default, let's create a simple implementation:
+added to provide feedback to the user that the program was still
+running. The spinner called `sleep 0.04` in a loop while printing the
+spinner characters to the screen. The creation of 25 forked processes
+per second actually slowed down the program! Bash does have a sleep
+builtin, but it is not enabled by default, let's create a simple
+implementation:
 
 ``` C
 #include "loadables.h"
@@ -126,11 +132,13 @@ bash: sleep: Unable to convert `⏰` to an integer
 
 Fabulous, so with a small amount of code and minimal boilerplate we have
 created a dynamically loaded Bash builtin! The sleep builtin satisfies
-reason number *(1)* on why you might write a builtin, i.e. to eliminate
-the need to fork a process. So, bring back the spinner! But, it does not
-satisfy reason number *(3)*, changing Bash's internal state. Let's
-implement an INI parser to satisfy reason number *(3)* and provide a
-more complete example of creating a Bash builtin.
+reason number *(1)* on why you might write a builtin by eliminating the
+need to fork a process for each `sleep` execution. With `sleep` as a
+builtin each call is a function call rather than a process `fork(2)`,
+i.e. bring back the spinner! But, it does not satisfy reason number
+*(3)*, changing Bash's internal state. Let's implement an INI parser to
+satisfy reason number *(3)* and provide a more complete example of
+creating a Bash builtin.
 
 ## Writing an INI Parser Builtin
 
@@ -295,12 +303,13 @@ We check Bash's `variable_context` to see if it is greater than zero
 which indicates we are in a function. If we are in a function we create
 local variables, unless the `-g` option was passed to our builtin. We
 then setup our config for our INI parser. Bash provides functions to
-create local(`make_local_assoc_variable`) and global
-variables(`make_new_assoc_variable`). Once we have created our `TOC`
-variable we call the `ini_parse_file` function with our file, config,
-and handler function. We are using the excellent
+create local, `make_local_assoc_variable` and global variables,
+`make_new_assoc_variable`. Once we have created our `TOC` variable we
+call the `ini_parse_file` function with our file, config, and handler
+function. We are using the excellent
 [inih](https://github.com/benhoyt/inih) library to do the heavy lifting
-of parsing the INI, but we do need to implement the handler function:
+of parsing the INI, but we do need to implement the inih handler
+function:
 
 ``` C
 /* This is the inih handler called for every new section and for every name and
@@ -385,7 +394,8 @@ Otherwise, we use Bash's `find_variable` function to retrieve our
 existing variable. Once we have our variable, Bash provides functions to
 alter a variable's value. Here we use `bind_assoc_variable` to populate
 an entry in our associative array with the name and value from the INI
-parser.
+parser. With our handler function complete our Bash builtin is ready to
+parse some INI configs.
 
 ### Building & Testing
 
@@ -423,8 +433,8 @@ clean:
   rm -f *.o *.so
 ```
 
-We compile our `ini.c` file as well as the `inih` library, then we link
-them together into a shared library. Our testing methodology is
+Here we compile our `ini.c` file as well as the `inih` library, then we
+link them together into a shared library. Our testing methodology is
 rudimentary, we have a Bash script which exercises the features of our
 builtin and we compare its output against a canonical copy:
 
@@ -441,8 +451,8 @@ diff -u test_output "$new"
 
 ### Let's Try It!
 
-Now that we have an INI builtin let's feed it a config for a fictional
-RSS reader and see how it performs.
+Now that we have compiled and tested our INI builtin, let's feed it a
+config for a fictional RSS reader and see how it performs.
 
 ``` bash
 $ ini -a rss_conf <<'EOF'
@@ -470,18 +480,19 @@ declare -A rss_conf_Computers=([www.linusakesson.net]="http://www.linusakesson.n
 
 Our `TOC` var `rss_conf` holds our section names, then we use Bash's
 nameref functionality to point a variable to each associative array for
-a given INI section from `rss_conf`. Now that we have the RSS config
-loaded, we *just* need to build the application to consume it!
+a given INI section from the `rss_conf` associative array. The RSS
+config is loaded into our program, now we *just* need to build the
+application to consume it!
 
 ## Closing Thoughts
 
 Bash builtins provide a number of positive features. They provide an
 interesting avenue for extending Bash to perform tasks which are perhaps
-ill suited to be written in the Bash language. Builtins allow Bash to
-leverage the vast quantity of well tested and established C libraries.
-Finally, as was hopefully demonstrated in the examples, Bash provides a
-good framework for builtins and a set of functions that makes modifying
-Bash's internal state straightforward.
+poorly suited to be written in the Bash language itself. Builtins also
+allow Bash to leverage the vast quantity of well tested and established
+C libraries. Lastly, as was hopefully demonstrated in the examples, Bash
+provides a good framework for builtins and a set of functions that makes
+modifying Bash's internal state straightforward.
 
 Given the positives of Bash builtins, why aren't there
 [more](https://github.com/search?o=desc&q=bash+builtin+language%3AC&s=stars&type=Repositories)
@@ -506,3 +517,8 @@ Bash. Bring your ideas!
     configs](https://github.com/benhoyt/inih)
 3.  [Bash builtin examples from Bash's source
     code](https://git.savannah.gnu.org/cgit/bash.git/tree/examples/loadables)
+
+## Acknowledgments
+
+Thanks to [Randall Mason](https://github.com/ClashTheBunny) for
+providing feedback on this post.
