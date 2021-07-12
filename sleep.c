@@ -3,8 +3,7 @@
 
 char *sleep_doc[] = {"Patience please, wait for a bit!", (char *)NULL};
 
-int sleep_builtin(list) WORD_LIST *list;
-{
+int sleep_builtin(WORD_LIST *list) {
   if (!list) {
     builtin_usage();
     return (EX_USAGE);

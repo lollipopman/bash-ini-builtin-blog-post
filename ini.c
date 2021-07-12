@@ -118,8 +118,7 @@ static int handler(void *user, const char *section, const char *name,
 
 /* This is essentially the main function for the ini builtin, it does arg
  * parsing and then calls the inih function to parse the provided ini FD */
-int ini_builtin(list) WORD_LIST *list;
-{
+int ini_builtin(WORD_LIST *list) {
   intmax_t intval;
   int opt, code;
   int fd = 0;
