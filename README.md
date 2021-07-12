@@ -83,8 +83,7 @@ implementation:
 
 char *sleep_doc[] = {"Patience please, wait for a bit!", (char *)NULL};
 
-int sleep_builtin(list) WORD_LIST *list;
-{
+int sleep_builtin(WORD_LIST *list) {
   if (!list) {
     builtin_usage();
     return (EX_USAGE);
@@ -215,8 +214,7 @@ call `fdopen(3)` to obtain a `FILE` stream structure which we pass to
 our INI parser.
 
 ``` C
-int ini_builtin(list) WORD_LIST *list;
-{
+int ini_builtin(WORD_LIST *list) {
   intmax_t intval;
   int opt, code;
   int fd = 0;
