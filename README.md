@@ -25,7 +25,7 @@ So if you have a task poorly suited to Bash, what are your options?
 ## What is a Bash Builtin?
 
 A builtin is a command in Bash that is implemented in the shell itself,
-rather than as a separate program. They are the 🔋🔋 included with Bash.
+rather than as a separate program. They are the `🔋🔋` included with Bash.
 If you type `help` in Bash you get a list of all the currently enabled
 builtins, or you can use `type printf` to check if a specific command is
 a builtin. Many of the commands you use regularly are builtins, e.g.
@@ -403,34 +403,36 @@ We put together a little `Makefile` to build and test our builtins:
 
 ``` make
 CC:=gcc
-INC:=-I /usr/include/bash -I /usr/include/bash/include -I /usr/include/bash/builtins -I /usr/lib/bash
+INC:=-I /usr/include/bash -I /usr/include/bash/include \
+    -I /usr/include/bash/builtins -I /usr/lib/bash
 CFLAGS:=-c -fPIC -Wall -Wextra
 LDFLAGS:=--shared
-INIH_FLAGS:=-DINI_CALL_HANDLER_ON_NEW_SECTION=1 -DINI_STOP_ON_FIRST_ERROR=1 -DINI_USE_STACK=0
+INIH_FLAGS:=-DINI_CALL_HANDLER_ON_NEW_SECTION=1 -DINI_STOP_ON_FIRST_ERROR=1 \
+    -DINI_USE_STACK=0
 
 ini.so: libinih.o ini.o
-  $(CC) -o $@ $^ $(LDFLAGS)
+    $(CC) -o $@ $^ $(LDFLAGS)
 
 sleep.so: sleep.o
-  $(CC) -o $@ $^ $(LDFLAGS)
+    $(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
-  $(CC) $(CFLAGS) $(INC) -o $@ $^
+    $(CC) $(CFLAGS) $(INC) -o $@ $^
 
 libinih.o: inih/ini.c
-  $(CC) $(CFLAGS) $(INIH_FLAGS) -o libinih.o inih/ini.c
+    $(CC) $(CFLAGS) $(INIH_FLAGS) -o libinih.o inih/ini.c
 
 inih/ini.c:
-  git submodule update --init
+    git submodule update --init
 
 .PHONY: test
 test: ini.so
-  ./test
-  @echo Tests Passed
+    ./test
+    @echo Tests Passed
 
 .PHONY: clean
 clean:
-  rm -f *.o *.so
+    rm -f *.o *.so
 ```
 
 Here we compile our `ini.c` file as well as the `inih` library, then we
@@ -455,34 +457,42 @@ Now that we have compiled and tested our INI builtin, let's feed it a
 config for a fictional RSS reader and see how it performs.
 
 ``` bash
+$ enable -f ./ini.so ini
 $ ini -a rss_conf <<'EOF'
-> [Computers]
-> Vidar's Blog = http://www.vidarholen.net/contents/blog/?feed=rss2
-> Two-Bit History = https://twobithistory.org/feed.xml
-> www.linusakesson.net = http://www.linusakesson.net/rssfeed.php
->
-> [Comics]
-> xkcd = http://xkcd.com/rss.xml
->
-> [Books]
-> The Marlowe Bookshelf = http://themarlowebookshelf.blogspot.com/feeds/posts/default
-> EOF
-$ declare -p rss_conf
-declare -A rss_conf=([Books]="true" [Comics]="true" [Computers]="true" )
-$ for ini_var in "${!rss_conf[@]}"; do
->    declare -n ini='rss_conf_'"$ini_var"
->    declare -p "${!ini}"
-> done
-declare -A rss_conf_Books=(["The Marlowe Bookshelf"]="http://themarlowebookshelf.blogspot.com/feeds/posts/default" )
-declare -A rss_conf_Comics=([xkcd]="http://xkcd.com/rss.xml" )
-declare -A rss_conf_Computers=([www.linusakesson.net]="http://www.linusakesson.net/rssfeed.php" ["Two-Bit History"]="https://twobithistory.org/feed.xml" ["Vidar's Blog"]="http://www.vidarholen.net/contents/blog/?feed=rss2" )
+ > [Computers]
+ > Vidar's Blog = http://www.vidarholen.net/contents/blog/?feed=rss2
+ > Two-Bit History = https://twobithistory.org/feed.xml
+ > www.linusakesson.net = http://www.linusakesson.net/rssfeed.php
+ > 
+ > [Comics]
+ > xkcd = http://xkcd.com/rss.xml
+ > 
+ > [Books]
+ > The Marlowe Bookshelf = http://themarlowebookshelf.blogspot.com/feeds/posts/default
+ > EOF
+$ for section_name in "${!rss_conf[@]}"; do
+ >   printf '## %s\n' "$section_name"
+ >   declare -n section='rss_conf_'"$section_name"
+ >   for key in "${!section[@]}"; do
+ >     printf ' - %s: %s\n' "$key" "${section[$key]}"
+ >   done
+ > done
+## Books
+ - The Marlowe Bookshelf: http://themarlowebookshelf.blogspot.com/feeds/posts/default
+## Comics
+ - xkcd: http://xkcd.com/rss.xml
+## Computers
+ - www.linusakesson.net: http://www.linusakesson.net/rssfeed.php
+ - Two-Bit History: https://twobithistory.org/feed.xml
+ - Vidar's Blog: http://www.vidarholen.net/contents/blog/?feed=rss2
 ```
 
 Our `TOC` var `rss_conf` holds our section names, then we use Bash's
 nameref functionality to point a variable to each associative array for
-a given INI section from the `rss_conf` associative array. The RSS
-config is loaded into our program, now we *just* need to build the
-application to consume it!
+a given INI section from the `rss_conf` associative array and iterate
+over the section associative arrays. We have the RSS config loaded into
+our Bash program, now we *just* need to build the application to consume
+it!
 
 ## Closing Thoughts
 

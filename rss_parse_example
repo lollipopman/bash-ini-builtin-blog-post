@@ -1,0 +1,13 @@
+#!/bin/bash
+
+enable -f ./ini.so ini
+
+ini -a rss_conf <rss_config.ini
+
+for section_name in "${!rss_conf[@]}"; do
+	printf '## %s\n' "$section_name"
+	declare -n section='rss_conf_'"$section_name"
+	for key in "${!section[@]}"; do
+		printf ' - %s: %s\n' "$key" "${section[$key]}"
+	done
+done
