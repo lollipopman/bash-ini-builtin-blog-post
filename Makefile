@@ -1,8 +1,10 @@
 CC:=gcc
-INC:=-I /usr/include/bash -I /usr/include/bash/include -I /usr/include/bash/builtins -I /usr/lib/bash
+INC:=-I /usr/include/bash -I /usr/include/bash/include \
+	-I /usr/include/bash/builtins -I /usr/lib/bash
 CFLAGS:=-c -fPIC -Wall -Wextra
 LDFLAGS:=--shared
-INIH_FLAGS:=-DINI_CALL_HANDLER_ON_NEW_SECTION=1 -DINI_STOP_ON_FIRST_ERROR=1 -DINI_USE_STACK=0
+INIH_FLAGS:=-DINI_CALL_HANDLER_ON_NEW_SECTION=1 -DINI_STOP_ON_FIRST_ERROR=1 \
+	-DINI_USE_STACK=0
 
 ini.so: libinih.o ini.o
 	$(CC) -o $@ $^ $(LDFLAGS)
