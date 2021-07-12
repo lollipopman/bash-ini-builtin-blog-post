@@ -25,19 +25,20 @@ So if you have a task poorly suited to Bash, what are your options?
 ## What is a Bash Builtin?
 
 A builtin is a command in Bash that is implemented in the shell itself,
-rather than as a separate program. They are the `🔋🔋` included with Bash.
-If you type `help` in Bash you get a list of all the currently enabled
-builtins, or you can use `type printf` to check if a specific command is
-a builtin. Many of the commands you use regularly are builtins, e.g.
-`echo`, `printf`, and `cd`. They are typically implemented in the
-language used to write the shell itself, so in the case of Bash, C. Some
-of Bash's builtins are also available as separate commands, depending on
-how your operating system is configured. For example `printf` is a Bash
-builtin, but it is also usually available on a Linux box as a separate
-program, try `which printf` to find out. Builtins are preferred in Bash
-over external programs, as if they were placed first in your `PATH`.
-Bash also allows you to write your own custom builtins and load them
-into the shell, as does Zsh and the KornShell.
+rather than as a separate program. They are the batteries included with
+Bash. If you type `help` in Bash you get a list of all the currently
+enabled builtins, or you can use `type printf` to check if a specific
+command is a builtin. Many of the commands you use regularly are
+builtins, e.g. `echo`, `printf`, and `cd`. They are typically
+implemented in the language used to write the shell itself, so in the
+case of Bash, C. Some of Bash's builtins are also available as separate
+commands, depending on how your operating system is configured. For
+example `printf` is a Bash builtin, but it is also usually available on
+a Linux box as a separate program, try `which printf` to find out.
+Builtins are preferred in Bash over external programs, as if they were
+placed first in your `PATH`. Bash also allows you to write your own
+custom builtins and load them into the shell, as does Zsh and the
+KornShell.
 
 ## Why Would You Write a Builtin?
 
