@@ -205,7 +205,7 @@ function of our builtin.
 
 Bash provides an `internal_getopt` function which is akin to
 `getopt(3)`, but uses Bash's internal `WORD_LIST` structure. We parse
-our mandatory argument `-t` for the name of the associative array which
+our mandatory argument `-a` for the name of the associative array which
 will contain our INI section names. We parse our optional `-u` argument
 which specifies an alternative [file
 descriptor](https://en.wikipedia.org/wiki/File_descriptor) to read from
