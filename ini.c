@@ -34,7 +34,7 @@ char *ini_doc[] = {
     "If the `-u FD` argument is passed the INI config is read from the `FD`",
     "file descriptor rather than from stdin. Variables are created with local",
     "scope inside a function unless the `-g` option is specified.",
-    (char *)NULL};
+    NULL};
 
 /* User data for inih callback handler */
 typedef struct {
@@ -54,7 +54,7 @@ static int handler(void *user, const char *section, const char *name,
   char *sep = "_";
   size_t sec_size = strlen(toc_var_name) + strlen(section) + strlen(sep) +
                     1; // +1 for the NUL character
-  char *sec_var_name = malloc(sec_size);
+  char *sec_var_name = xmalloc(sec_size);
   char *sec_end = sec_var_name + sec_size - 1;
   char *p = memccpy(sec_var_name, toc_var_name, '\0', sec_size);
   if (!p) {
@@ -137,35 +137,35 @@ int ini_builtin(WORD_LIST *list) {
       code = legal_number(list_optarg, &intval);
       if (code == 0 || intval < 0 || intval != (int)intval) {
         builtin_error("%s: invalid file descriptor specification", list_optarg);
-        return (EXECUTION_FAILURE);
+        return EXECUTION_FAILURE;
       }
       fd = (int)intval;
       if (sh_validfd(fd) == 0) {
         builtin_error("%d: invalid file descriptor: %s", fd, strerror(errno));
-        return (EXECUTION_FAILURE);
+        return EXECUTION_FAILURE;
       }
       break;
     case GETOPT_HELP:
       builtin_help();
-      return (EX_USAGE);
+      return EX_USAGE;
     default:
       builtin_usage();
-      return (EX_USAGE);
+      return EX_USAGE;
     }
   }
   if (!toc_var_name) {
     builtin_usage();
-    return (EX_USAGE);
+    return EX_USAGE;
   }
   FILE *file = fdopen(fd, "r");
   if (!file) {
     builtin_error("%d: unable to open file descriptor: %s", fd,
                   strerror(errno));
-    return (EXECUTION_FAILURE);
+    return EXECUTION_FAILURE;
   }
   ini_conf conf = {};
   conf.toc_var_name = toc_var_name;
-  if ((variable_context > 0) && (global_vars == false)) {
+  if (variable_context && !global_vars) {
     conf.local_vars = true;
   } else {
     conf.local_vars = false;
@@ -179,21 +179,22 @@ int ini_builtin(WORD_LIST *list) {
   }
   if (!toc_var) {
     builtin_error("Could not make %s", toc_var_name);
-    return 0;
+    return EXECUTION_FAILURE;
   }
   if (ini_parse_file(file, handler, &conf) < 0) {
     builtin_error("Unable to read from fd: %d", fd);
-    return (EXECUTION_FAILURE);
+    return EXECUTION_FAILURE;
   }
-  return (EXECUTION_SUCCESS);
+  return EXECUTION_SUCCESS;
 }
 
 /* Provides Bash with information about the builtin */
 struct builtin ini_struct = {
-    "ini",                     /* Builtin name */
-    ini_builtin,               /* Function implementing the builtin */
-    BUILTIN_ENABLED,           /* Initial flags for builtin */
-    ini_doc,                   /* Array of long documentation strings. */
-    "ini -a TOC [-u FD] [-g]", /* Usage synopsis; becomes short_doc */
-    0                          /* Reserved for internal use */
+    .name = "ini",            /* Builtin name */
+    .function = ini_builtin,  /* Function implementing the builtin */
+    .flags = BUILTIN_ENABLED, /* Initial flags for builtin */
+    .long_doc = ini_doc,      /* Array of long documentation strings. */
+    .short_doc =
+        "ini -a TOC [-u FD] [-g]", /* Usage synopsis; becomes short_doc */
+    .handle = 0                    /* Reserved for internal use */
 };

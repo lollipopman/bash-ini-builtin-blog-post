@@ -81,32 +81,37 @@ implementation:
 #include "loadables.h"
 #include <errno.h>
 
-char *sleep_doc[] = {"Patience please, wait for a bit!", (char *)NULL};
+char *sleep_doc[] = {"Patience please, wait for a bit!", NULL};
 
 int sleep_builtin(WORD_LIST *list) {
   if (!list) {
     builtin_usage();
-    return (EX_USAGE);
+    return EX_USAGE;
   }
   char *endptr;
   char *secs_arg = list->word->word;
   uintmax_t secs = strtoumax(list->word->word, &endptr, 10);
   if ((secs == UINTMAX_MAX && errno == ERANGE) || (*endptr != '\0')) {
     builtin_error("Unable to convert `%s` to an integer", secs_arg);
-    return (EXECUTION_FAILURE);
+    return EXECUTION_FAILURE;
   }
-  sleep(secs);
-  return (EXECUTION_SUCCESS);
+  unsigned int rem = sleep(secs);
+  if (rem == 0) {
+    return EXECUTION_SUCCESS;
+  } else {
+    builtin_error("Sleep interrupted, %d secs remaining", rem);
+    return EXECUTION_FAILURE;
+  }
 }
 
 /* Provides Bash with information about the builtin */
 struct builtin sleep_struct = {
-    "sleep",         /* Builtin name */
-    sleep_builtin,   /* Function implementing the builtin */
-    BUILTIN_ENABLED, /* Initial flags for builtin */
-    sleep_doc,       /* Array of long documentation strings. */
-    "sleep NUMBER",  /* Usage synopsis; becomes short_doc */
-    0                /* Reserved for internal use */
+    .name = "sleep",             /* Builtin name */
+    .function = sleep_builtin,   /* Function implementing the builtin */
+    .flags = BUILTIN_ENABLED,    /* Initial flags for builtin */
+    .long_doc = sleep_doc,       /* Array of long documentation strings. */
+    .short_doc = "sleep NUMBER", /* Usage synopsis; becomes short_doc */
+    .handle = 0                  /* Reserved for internal use */
 };
 ```
 
@@ -180,19 +185,20 @@ char *ini_doc[] = {
     "If the `-u FD` argument is passed the INI config is read from the `FD`",
     "file descriptor rather than from stdin. Variables are created with local",
     "scope inside a function unless the `-g` option is specified.",
-    (char *)NULL};
+    NULL};
 ```
 
 ### Informing Bash About our Builtin
 
 ``` C
 struct builtin ini_struct = {
-    "ini",                     /* Builtin name */
-    ini_builtin,               /* Function implementing the builtin */
-    BUILTIN_ENABLED,           /* Initial flags for builtin */
-    ini_doc,                   /* Array of long documentation strings. */
-    "ini -a TOC [-u FD] [-g]", /* Usage synopsis; becomes short_doc */
-    0                          /* Reserved for internal use */
+    .name = "ini",            /* Builtin name */
+    .function = ini_builtin,  /* Function implementing the builtin */
+    .flags = BUILTIN_ENABLED, /* Initial flags for builtin */
+    .long_doc = ini_doc,      /* Array of long documentation strings. */
+    .short_doc =
+        "ini -a TOC [-u FD] [-g]", /* Usage synopsis; becomes short_doc */
+    .handle = 0                    /* Reserved for internal use */
 };
 ```
 
@@ -233,31 +239,31 @@ int ini_builtin(WORD_LIST *list) {
       code = legal_number(list_optarg, &intval);
       if (code == 0 || intval < 0 || intval != (int)intval) {
         builtin_error("%s: invalid file descriptor specification", list_optarg);
-        return (EXECUTION_FAILURE);
+        return EXECUTION_FAILURE;
       }
       fd = (int)intval;
       if (sh_validfd(fd) == 0) {
         builtin_error("%d: invalid file descriptor: %s", fd, strerror(errno));
-        return (EXECUTION_FAILURE);
+        return EXECUTION_FAILURE;
       }
       break;
     case GETOPT_HELP:
       builtin_help();
-      return (EX_USAGE);
+      return EX_USAGE;
     default:
       builtin_usage();
-      return (EX_USAGE);
+      return EX_USAGE;
     }
   }
   if (!toc_var_name) {
     builtin_usage();
-    return (EX_USAGE);
+    return EX_USAGE;
   }
   FILE *file = fdopen(fd, "r");
   if (!file) {
     builtin_error("%d: unable to open file descriptor: %s", fd,
                   strerror(errno));
-    return (EXECUTION_FAILURE);
+    return EXECUTION_FAILURE;
   }
   /* snip */
 }
@@ -274,7 +280,7 @@ the `TOC` var:
 /* snip */
 ini_conf conf = {};
 conf.toc_var_name = toc_var_name;
-if ((variable_context > 0) && (global_vars == false)) {
+if (variable_context && !global_vars) {
   conf.local_vars = true;
 } else {
   conf.local_vars = false;
@@ -288,13 +294,13 @@ if (conf.local_vars) {
 }
 if (!toc_var) {
   builtin_error("Could not make %s", toc_var_name);
-  return 0;
+  return EXECUTION_FAILURE;
 }
 if (ini_parse_file(file, handler, &conf) < 0) {
   builtin_error("Unable to read from fd: %d", fd);
-  return (EXECUTION_FAILURE);
+  return EXECUTION_FAILURE;
 }
-return (EXECUTION_SUCCESS);
+return EXECUTION_SUCCESS;
 /* snip */
 ```
 
@@ -323,7 +329,7 @@ static int handler(void *user, const char *section, const char *name,
   char *sep = "_";
   size_t sec_size = strlen(toc_var_name) + strlen(section) + strlen(sep) +
                     1; // +1 for the NUL character
-  char *sec_var_name = malloc(sec_size);
+  char *sec_var_name = xmalloc(sec_size);
   char *sec_end = sec_var_name + sec_size - 1;
   char *p = memccpy(sec_var_name, toc_var_name, '\0', sec_size);
   if (!p) {
@@ -409,17 +415,15 @@ LDFLAGS:=--shared
 INIH_FLAGS:=-DINI_CALL_HANDLER_ON_NEW_SECTION=1 -DINI_STOP_ON_FIRST_ERROR=1 \
     -DINI_USE_STACK=0
 
-ini.so: libinih.o ini.o
-    $(CC) -o $@ $^ $(LDFLAGS)
+ini.so: inih/ini.o
 
-sleep.so: sleep.o
+%.so: %.o
     $(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
     $(CC) $(CFLAGS) $(INC) -o $@ $^
 
-libinih.o: inih/ini.c
-    $(CC) $(CFLAGS) $(INIH_FLAGS) -o libinih.o inih/ini.c
+inih/ini.o: CFLAGS += $(INIH_FLAGS)
 
 inih/ini.c:
     git submodule update --init
@@ -431,7 +435,7 @@ test: ini.so
 
 .PHONY: clean
 clean:
-    rm -f *.o *.so
+    rm -f **/*.o **/*.so
 ```
 
 Here we compile our `ini.c` file as well as the `inih` library, then we

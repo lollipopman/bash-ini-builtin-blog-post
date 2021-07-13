@@ -6,17 +6,15 @@ LDFLAGS:=--shared
 INIH_FLAGS:=-DINI_CALL_HANDLER_ON_NEW_SECTION=1 -DINI_STOP_ON_FIRST_ERROR=1 \
 	-DINI_USE_STACK=0
 
-ini.so: libinih.o ini.o
-	$(CC) -o $@ $^ $(LDFLAGS)
+ini.so: inih/ini.o
 
-sleep.so: sleep.o
+%.so: %.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INC) -o $@ $^
 
-libinih.o: inih/ini.c
-	$(CC) $(CFLAGS) $(INIH_FLAGS) -o libinih.o inih/ini.c
+inih/ini.o: CFLAGS += $(INIH_FLAGS)
 
 inih/ini.c:
 	git submodule update --init
@@ -28,4 +26,4 @@ test: ini.so
 
 .PHONY: clean
 clean:
-	rm -f *.o *.so
+	rm -f **/*.o **/*.so
