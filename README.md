@@ -315,8 +315,8 @@ create local, `make_local_assoc_variable` and global variables,
 `make_new_assoc_variable`. Once we have created our `TOC` variable we
 call the `ini_parse_file` function with our file, config, and handler
 function. We are using the excellent
-[inih](https://github.com/benhoyt/inih) library to do the heavy lifting
-of parsing the INI, but we do need to implement the inih handler
+[inih](https://github.com/benhoyt/inih) library to do the complicated
+parsing of the INI, but we do need to implement the inih handler
 function:
 
 ``` C
