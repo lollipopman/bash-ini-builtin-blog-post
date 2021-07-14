@@ -1,0 +1,8 @@
+FROM gentoo/stage3
+
+RUN echo 'app-shells/bash plugins' >> /etc/portage/package.use/bash
+RUN emerge --sync && \
+  emerge app-shells/bash
+
+WORKDIR /root
+CMD make clean ini.so

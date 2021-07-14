@@ -1,4 +1,7 @@
-#include "loadables.h"
+#include "builtins.h"
+#include "shell.h"
+#include "bashgetopt.h"
+#include "common.h"
 #include <errno.h>
 
 char *sleep_doc[] = {"Patience please, wait for a bit!", NULL};

@@ -1,5 +1,8 @@
 #include "inih/ini.h"
-#include "loadables.h"
+#include "builtins.h"
+#include "shell.h"
+#include "bashgetopt.h"
+#include "common.h"
 #include <errno.h>
 #include <stdbool.h>
 
