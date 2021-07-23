@@ -1,6 +1,6 @@
 SHELL=/bin/bash
 CC:=gcc
-CFLAGS:=-c -Wall -Wextra -fPIC
+CFLAGS:=-c -Wall -Wextra -pedantic -fPIC
 BASH_FLAGS:=$(shell pkgconf --cflags bash)
 LDFLAGS:=--shared
 INIH_FLAGS:=-DINI_CALL_HANDLER_ON_NEW_SECTION=1 -DINI_STOP_ON_FIRST_ERROR=1 \

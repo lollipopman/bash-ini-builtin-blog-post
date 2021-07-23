@@ -166,7 +166,7 @@ int ini_builtin(WORD_LIST *list) {
                   strerror(errno));
     return EXECUTION_FAILURE;
   }
-  ini_conf conf = {};
+  ini_conf conf = {0};
   conf.toc_var_name = toc_var_name;
   if (variable_context && !global_vars) {
     conf.local_vars = true;
